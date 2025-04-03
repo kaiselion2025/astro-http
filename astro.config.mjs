@@ -11,7 +11,7 @@ import cloudflare from '@astrojs/cloudflare'
 export default defineConfig({
 	site: 'https://example.com',
 
-	output: 'server',
+	output: 'static',
 	// adapter: node({
 	// 	mode: 'standalone'
 	// })
