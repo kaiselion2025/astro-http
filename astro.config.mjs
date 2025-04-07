@@ -7,6 +7,8 @@ import cloudflare from '@astrojs/cloudflare'
 
 import db from '@astrojs/db';
 
+import vue from '@astrojs/vue';
+
 // import node from '@astrojs/node'
 
 // https://astro.build/config
@@ -17,7 +19,7 @@ export default defineConfig({
     // adapter: node({
     // 	mode: 'standalone'
     // })
-    integrations: [mdx(), sitemap(), db()],
+    integrations: [mdx(), sitemap(), db(), vue()],
 
     adapter: cloudflare()
 })
