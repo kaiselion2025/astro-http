@@ -14,13 +14,13 @@ export async function getStaticPaths() {
 	// }))
 
 	const regularPaths = posts.map((post) => ({
-		params: { slug: post.slug },
+		params: { slug: post.id },
 		props: post
 	}))
 
 	// Genera rutas adicionales para manejar solicitudes con ".md"
 	const mdPaths = posts.map((post) => ({
-		params: { slug: `${post.slug}.md` },
+		params: { slug: `${post.id}.md` },
 		props: post
 	}))
 
