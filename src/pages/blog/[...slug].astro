@@ -4,14 +4,27 @@ import BlogPost from '../../layouts/BlogPost.astro'
 
 import LikeCounter from '@components/likes/LikeCounter.vue'
 
-export const prerender = false
+export const prerender = true
 
 export async function getStaticPaths() {
 	const posts = await getCollection('blog')
-	return posts.map((post) => ({
-		params: { slug: post.id },
+	// return posts.map((post) => ({
+	// 	params: { slug: post.slug },
+	// 	props: post
+	// }))
+
+	const regularPaths = posts.map((post) => ({
+		params: { slug: post.slug },
 		props: post
 	}))
+
+	// Genera rutas adicionales para manejar solicitudes con ".md"
+	const mdPaths = posts.map((post) => ({
+		params: { slug: `${post.slug}.md` },
+		props: post
+	}))
+
+	return [...regularPaths, ...mdPaths]
 }
 type Props = CollectionEntry<'blog'>
 
