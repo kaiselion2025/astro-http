@@ -70,7 +70,8 @@ const likePost = async () => {
 }
 
 const getCurrentLikes = async () => {
-	const { data, error } = await actions.getPostLikes(props.postId)
+	//const { data, error } = await actions.getPostLikes(props.postId)
+	const { data, error } = await actions.getPostLikes({ postId: props.postId })
 
 	if (error) {
 		return alert(error)
