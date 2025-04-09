@@ -1,12 +1,6 @@
 import { actions, defineAction } from 'astro:actions'
-import { db, eq, Posts } from 'astro:db'
+import { db, Posts, eq } from 'astro:db'
 import { z } from 'astro:schema'
-
-type UpdateLikesResponse = {
-	success: boolean
-	error?: string
-	likes?: number
-}
 
 export const updatePostLikes = defineAction({
 	accept: 'json',
@@ -14,73 +8,61 @@ export const updatePostLikes = defineAction({
 		postId: z.string(),
 		increment: z.number()
 	}),
-	handler: async ({ postId, increment }): Promise<UpdateLikesResponse> => {
+	handler: async ({ postId, increment }) => {
 		try {
-			// Verificar que postId y increment son valores válidos
-			if (!postId || typeof increment !== 'number') {
-				return {
-					success: false,
-					error: 'Parámetros inválidos'
-				}
-			}
-
-			// Obtener los likes actuales
+			// Obtener información del post
 			const { data, error } = await actions.getPostLikes(postId)
-
 			if (error) {
 				console.error('Error al obtener likes:', error)
-				return {
-					success: false,
-					error: 'Error al obtener likes'
-				}
+				throw new Error('Algo Salió Mal')
+			}
+
+			// Verificar que data tenga la estructura esperada
+			if (!data) {
+				console.error('No se recibieron datos de getPostLikes')
+				throw new Error('Datos de post no disponibles')
 			}
 
 			const { exists, likes } = data
 
-			// Si el post no existe, crearlo
+			// Si el post no existe, crear uno nuevo
 			if (!exists) {
-				try {
-					const newPost = {
-						id: postId,
-						title: 'Post not found',
-						likes: 0
-					}
+				const newPost = {
+					id: postId,
+					title: 'Unknown',
+					likes: 0
+				}
 
+				try {
 					await db.insert(Posts).values(newPost)
 				} catch (insertError) {
-					console.error('Error al crear nuevo post:', insertError)
-					return {
-						success: false,
-						error: 'Error al crear post'
-					}
+					console.error('Error al insertar nuevo post:', insertError)
+					throw new Error('No se pudo crear el post')
 				}
 			}
 
-			// Actualizar los likes
+			// Actualizar los likes del post
 			try {
 				await db
 					.update(Posts)
 					.set({
-						likes: likes + increment
+						likes: exists ? likes + increment : increment
 					})
 					.where(eq(Posts.id, postId))
-
-				return {
-					success: true,
-					likes: likes + increment
-				}
 			} catch (updateError) {
 				console.error('Error al actualizar likes:', updateError)
-				return {
-					success: false,
-					error: 'Error al actualizar likes'
-				}
+				throw new Error('No se pudieron actualizar los likes')
 			}
-		} catch (e) {
-			console.error('Error inesperado:', e)
+
+			return true
+		} catch (error) {
+			console.error('Error en updatePostLikes:', error)
+			// En lugar de lanzar el error directamente, devuelve un objeto con formato
 			return {
-				success: false,
-				error: 'Error interno del servidor'
+				error: {
+					message: error instanceof Error ? error.message : 'Error desconocido',
+					code: 'UPDATE_LIKES_ERROR'
+				}
 			}
 		}
 	}
