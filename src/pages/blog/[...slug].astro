@@ -2,7 +2,7 @@
 import { type CollectionEntry, getCollection, render } from 'astro:content'
 import BlogPost from '../../layouts/BlogPost.astro'
 
-import LikeCounter from '@components/likes/LikeCounter.vue'
+import LikeCounterAction from '@components/likes/LikeCounterAction.vue'
 
 export const prerender = true
 
@@ -39,7 +39,7 @@ const { Content } = await render(post)
 			height: '50px'
 		}}
 	>
-		<LikeCounter postId={post.id} client:only='vue' />
+		<LikeCounterAction postId={post.id} client:only='vue' />
 	</div>
 	<Content />
 </BlogPost>
